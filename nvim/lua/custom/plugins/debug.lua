@@ -3,12 +3,15 @@ return {
     dependencies = {
         -- Creates a debugger ui
         "rcarriga/nvim-dap-ui",
+        "theHamsta/nvim-dap-virtual-text",
+        "nvim-telescope/telescope-dap.nvim",
 
         -- Installs the debug adapters for you
         "williamboman/mason.nvim",
         "jay-babu/mason-nvim-dap.nvim",
 
         -- Add your own debuggers here
+        "leoluz/nvim-dap-go",
     },
     config = function()
         local dap = require "dap"
@@ -18,7 +21,15 @@ return {
             -- Makes a best effort to setup the various debuggers with
             --  reasonable debug configurations
             automatic_setup = true,
-            ensure_installed = {},
+            ensure_installed = {
+                "delve",
+                "python",
+                "js",
+                "javadbg",
+                "javatest",
+                "cppdbg",
+                "bash",
+            },
         }
 
         -- You can provide additional configuration to the handlers,
@@ -57,7 +68,7 @@ return {
         dap.listeners.before.event_terminated["dapui_config"] = dapui.close
         dap.listeners.before.event_exited["dapui_config"] = dapui.close
         -- Install specific config
-        -- eg. require("dap-go").setup()
+        require("dap-go").setup()
     end,
 }
 

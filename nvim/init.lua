@@ -34,7 +34,11 @@ require("lazy").setup({
 		dependencies = {
 			"williamboman/mason.nvim",
 			"williamboman/mason-lspconfig.nvim",
+			"folke/neodev.nvim",
 		}
+	},
+	{
+		"VonHeikemen/lsp-zero.nvim",
 	},
 	{
 		"hrsh7th/nvim-cmp",
@@ -73,10 +77,8 @@ require("lazy").setup({
 	},
 	{
 		"lukas-reineke/indent-blankline.nvim",
-		opts = {
-			char = "┊",
-			show_trailing_blankline_indent = false,
-		}
+		main = "ibl",
+		opts = {},
 	},
 	{
 		"folke/trouble.nvim",
@@ -96,8 +98,8 @@ require("lazy").setup({
 -- Set highlight on search
 vim.o.hlsearch = false
 
--- Make linenumbers default
-vim.wo.number = true
+-- Make relative linenumbers default
+vim.wo.relativenumber = true
 
 -- Enable break indent
 vim.o.breakindent = true
@@ -241,7 +243,7 @@ end, { desc = "[/] Fuzzy search in current buffer" })
 --[[ Configure Treesitter ]]
 require("nvim-treesitter.configs").setup {
 	ensure_installed = { "lua", "python", "tsx", "typescript", "javascript", "vim", "rust", "c", "cpp", "go",
-		"java", "latex" },
+		"java", "latex", "ocaml" },
 	-- Autoinstall languages that are not installed. Defaults to false.
 	auto_install = false,
 
@@ -309,7 +311,9 @@ vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagn
 
 -- LSP Settings
 -- This function gets run when an LSP connects to a particualr buffer.
-local on_attach = function(_, bufnr)
+local lsp_zero = require("lsp-zero")
+
+lsp_zero.on_attach = function(client, bufnr)
 	local nmap = function(keys, func, desc)
 		if desc then
 			desc = "LSP: " .. desc
@@ -345,25 +349,15 @@ local on_attach = function(_, bufnr)
 end
 
 local servers = {
-	-- gopls = {},
-	-- pyright = {},
-	rust_analyzer = {},
-	tsserver = {},
-	clangd = {},
-
-	lua_ls = {
-		Lua = {
-			workspace = { checkThirdParty = false },
-			telemetry = { enable = false },
-			diagnostics = {
-				globals = { "vim" }
-			}
-		},
-	},
+	"gopls",
+	"pyright",
+	"rust_analyzer",
+	"tsserver",
+	"clangd",
 }
 
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
-local cpabilities = vim.lsp.protocol.make_client_capabilities()
+local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 
 -- Setup mason so it can manage external tooling
@@ -373,21 +367,25 @@ require("mason").setup()
 local mason_lspconfig = require "mason-lspconfig"
 
 mason_lspconfig.setup {
-	ensure_installed = vim.tbl_keys(servers),
+	ensure_installed = servers,
+	handlers = {
+		lsp_zero.default_setup,
+		lua_ls = function()
+			local lua_opts = lsp_zero.nvim_lua_ls()
+			require('lspconfig').lua_ls.setup(lua_opts)
+		end,
+	}
 }
 
-mason_lspconfig.setup_handlers {
-	function(server_name)
-		require("lspconfig")[server_name].setup {
-			capabilities = capabilities,
-			on_attach = on_attach,
-			settings = servers[server_name],
-		}
-	end,
-}
+lsp_zero.setup_servers(vim.tbl_keys(servers))
+require('lspconfig').ocamllsp.setup {}
+
+-- use below with lsp of choice for custom config
+-- require("lspconfig").lua_ls.setup({})
 
 --nvim-cmp setup
 local cmp = require "cmp"
+local cmp_select = { behavior = cmp.SelectBehavior.Select }
 local luasnip = require "luasnip"
 
 luasnip.config.setup {}
@@ -397,14 +395,14 @@ cmp.setup {
 			luasnip.lsp_expand(args.body)
 		end,
 	},
+	formatting = lsp_zero.cmp_format(),
 	mapping = cmp.mapping.preset.insert {
-		["<C-p>"] = cmp.mapping.select_prev_item(),
-		["<C-n>"] = cmp.mapping.select_next_item(),
+		["<C-p>"] = cmp.mapping.select_prev_item(cmp_select),
+		["<C-n>"] = cmp.mapping.select_next_item(cmp_select),
 		["<C-d>"] = cmp.mapping.scroll_docs(-4),
 		["<C-f>"] = cmp.mapping.scroll_docs(4),
 		["<C-Space>"] = cmp.mapping.complete {},
 		["<CR>"] = cmp.mapping.confirm {
-			behavior = cmp.ConfirmBehavior.Replace,
 			select = true,
 		},
 		["<Tab>"] = cmp.mapping(function(fallback)
@@ -427,6 +425,7 @@ cmp.setup {
 		end, { 'i', 's' }),
 	},
 	sources = {
+		{ name = "path" },
 		{ name = "nvim_lsp" },
 		{ name = "luasnip" },
 	},
