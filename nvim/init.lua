@@ -87,6 +87,9 @@ require("lazy").setup({
 			require("trouble").setup {}
 		end
 	},
+	{
+		"github/copilot.vim",
+	},
 
 	{ import = "custom.plugins" },
 
@@ -405,7 +408,7 @@ cmp.setup {
 		["<CR>"] = cmp.mapping.confirm {
 			select = true,
 		},
-		["<Tab>"] = cmp.mapping(function(fallback)
+		--[[["<Tab>"] = cmp.mapping(function(fallback)
 			if cmp.visible() then
 				cmp.select_next_item()
 			elseif luasnip.expand_or_jumpable() then
@@ -422,7 +425,7 @@ cmp.setup {
 			else
 				fallback()
 			end
-		end, { 'i', 's' }),
+		end, { 'i', 's' }), ]]--
 	},
 	sources = {
 		{ name = "path" },
