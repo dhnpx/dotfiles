@@ -3,6 +3,7 @@ return {
     dependencies = {
         -- Creates a debugger ui
         "rcarriga/nvim-dap-ui",
+        "nvim-neotest/nvim-nio",
         "theHamsta/nvim-dap-virtual-text",
         "nvim-telescope/telescope-dap.nvim",
 

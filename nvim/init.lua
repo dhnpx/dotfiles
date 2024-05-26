@@ -26,9 +26,100 @@ require("lazy").setup({
 				style = "darker",
 				transparent = true,
 			})
-			vim.cmd.colorscheme "onedark"
 		end,
 	},
+	{
+		"catppuccin/nvim",
+		name = "catppuccin",
+		config = function()
+			require("catppuccin").setup({
+				flavour = "mocha", -- latte, frappe, macchiato, mocha
+				background = { -- :h background
+					light = "latte",
+					dark = "mocha",
+				},
+				transparent_background = false, -- disables setting the background color.
+				show_end_of_buffer = false, -- shows the '~' characters after the end of buffers
+				term_colors = false, -- sets terminal colors (e.g. `g:terminal_color_0`)
+				dim_inactive = {
+					enabled = false, -- dims the background color of inactive window
+					shade = "dark",
+					percentage = 0.15, -- percentage of the shade to apply to the inactive window
+				},
+				no_italic = false,  -- Force no italic
+				no_bold = false,    -- Force no bold
+				no_underline = false, -- Force no underline
+				styles = {          -- Handles the styles of general hi groups (see `:h highlight-args`):
+					comments = { "italic" }, -- Change the style of comments
+					conditionals = { "italic" },
+					loops = {},
+					functions = {},
+					keywords = {},
+					strings = {},
+					variables = {},
+					numbers = {},
+					booleans = {},
+					properties = {},
+					types = {},
+					operators = {},
+				},
+				color_overrides = {
+					mocha = {
+						red = "#e55f86",
+						green = "#00D787",
+						peach = "#EBFF71",
+						blue = "#50a4e7",
+						mauve = "#9076e7",
+						sky = "#50e6e6",
+						pink = "#e781d6",
+
+						maroon = "#d15577",
+						teal = "#43c383",
+						yellow = "#d8e77b",
+						lavender = "#4886c8",
+						flamingo = "#8861dd",
+						sapphire = "#43c3c3",
+						rosewater = "#d76dc5",
+
+						text = "#e7e7e7",
+						subtext1 = "#dbdbdb",
+						subtext2 = "#cacaca",
+
+						overlay2 = "#b2b5b3",
+						overlay1 = "#a8aba9",
+						overlay0 = "#9ea19f",
+
+						surface2 = "#353331",
+						surface1 = "#2f2e2d",
+						surface0 = "#2c2a2a",
+
+						base = "#171717",
+						mantle = "#111111",
+						crust = "#0a0a0a",
+					},
+					latte = {
+						base = "#fffffa",
+						mantle = "#e7e8e9",
+						crust = "#d3d4d5",
+					},
+				},
+				custom_highlights = {},
+				integrations = {
+					cmp = true,
+					gitsigns = true,
+					nvimtree = true,
+					treesitter = true,
+					notify = false,
+					mini = {
+						enabled = true,
+						indentscope_color = "",
+					},
+					-- For more plugins integrations please scroll down (https://github.com/catppuccin/nvim#integrations)
+				},
+			})
+		end,
+	},
+
 	{
 		"neovim/nvim-lspconfig",
 		dependencies = {
@@ -82,7 +173,9 @@ require("lazy").setup({
 	},
 	{
 		"folke/trouble.nvim",
-		dependencies = {},
+		dependencies = {
+			"kyazdani42/nvim-web-devicons",
+		},
 		config = function()
 			require("trouble").setup {}
 		end
@@ -95,7 +188,8 @@ require("lazy").setup({
 
 }, {})
 
-
+-- Colorscheme
+vim.cmd.colorscheme "catppuccin"
 
 
 -- Set highlight on search
@@ -425,7 +519,7 @@ cmp.setup {
 			else
 				fallback()
 			end
-		end, { 'i', 's' }), ]]--
+		end, { 'i', 's' }), ]] --
 	},
 	sources = {
 		{ name = "path" },
